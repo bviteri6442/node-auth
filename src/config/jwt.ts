@@ -1,10 +1,12 @@
 import jwt, { type SignOptions } from 'jsonwebtoken';
+import { envs } from './envs';
 
 
-
+const JWT_SEED = envs.JWT_SEED;
 
 export class JwtAdapter {
 
+    
     static async generateToken( 
         payload: object, 
         duration: string ='2h' ): Promise<string|null> {
@@ -13,7 +15,7 @@ export class JwtAdapter {
 
             //TODO: generacion del seed
 
-            jwt.sign( payload, 'SEED', { expiresIn: duration } as SignOptions, (err, token) => {
+            jwt.sign( payload, JWT_SEED, { expiresIn: duration } as SignOptions, (err, token) => {
                 
                 if (err) return resolve(null);
                 
@@ -28,12 +30,12 @@ export class JwtAdapter {
 
 
 
-    static  validateToken( token: string )  {
+    static  validateToken<T>( token: string ): Promise<T|null> {
         return new Promise( (resolve) => {
-            jwt.verify( token, 'SEED', (err, decoded) => {
+            jwt.verify( token, JWT_SEED, (err, decoded) => {
                 if (err) return resolve(null);
 
-                resolve( decoded );
+                resolve( decoded as T );
             });
         });
     }

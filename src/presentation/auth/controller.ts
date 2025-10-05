@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { AuthRepository, CustomError, RegisterUserDto } from "../../domain";
+import { AuthRepository, CustomError, LoginUser, LoginUserDto, RegisterUser, RegisterUserDto } from "../../domain";
 import { JwtAdapter } from "../../config";
 import { UserModel } from "../../data/mongodb";
 
@@ -19,7 +19,7 @@ export class AuthController {
         }
 
         console.log(error); //winston
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error ' });
     }
 
 
@@ -28,22 +28,21 @@ export class AuthController {
         const [error, registerUserDto] = RegisterUserDto.create(req.body);
         if (error) return res.status(400).json({ error });
         
-        this.authRepository.register(registerUserDto!)
-        .then(async (user) => {
-
-            res.json ({
-                user,
-                token: await JwtAdapter.generateToken({ id: user.id })
-            });
-            
-        })
-        .catch(error => this.handleError(error, res));
-
+        new RegisterUser(this.authRepository)
+        .execute(registerUserDto!)
+        .then( data => res.json(data) )
+        .catch( error => this.handleError(error, res) );
     }
 
     loginUser =  (req: Request, res: Response) => {
         //TODO
-        res.json('login user controller')
+        const [error, loginUserDto] = LoginUserDto.create(req.body);
+        if (error) return res.status(400).json({ error });
+        
+        new LoginUser(this.authRepository)
+        .execute(loginUserDto!)
+        .then( data => res.json(data) )
+        .catch( error => this.handleError(error, res) );
     }
 
 
@@ -53,10 +52,10 @@ export class AuthController {
         .then(users => {
             res.json({
                 //users,
-                token: req.body.payload
+                user: req.body.user
             });
         })
-        .catch(() => res.status(500).json({ error: 'Internal Server Error' }));
+        .catch(() => res.status(500).json({ error: 'Internal Server Error ' }));
 
     }
 
