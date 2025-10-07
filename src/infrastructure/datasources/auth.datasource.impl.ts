@@ -21,7 +21,7 @@ export class AuthDatasourceImpl implements AuthDataSource{
 
        try {
             //1. buscar el usuario por email
-            const user =  UserModel.findOne({ email });
+            const user =  await UserModel.findOne({ email });
             if(!user) throw CustomError.badRequest('User not exists - email');
 
             //2. comparar la contraseña
