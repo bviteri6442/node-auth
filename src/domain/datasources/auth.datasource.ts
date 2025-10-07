@@ -15,5 +15,6 @@ export abstract class AuthDataSource {
 
     abstract register (registerUserDto: RegisterUserDto): Promise<UserEntity>
     
+    abstract getAllUsers(): Promise<UserEntity[]>
 
 }

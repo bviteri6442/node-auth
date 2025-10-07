@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { JwtAdapter } from "../../config";
 import { UserModel } from "../../data/mongodb";
+import { PostgresDatabase } from "../../data/postgres";
 
 
 
@@ -20,12 +21,24 @@ export class AuthMiddleware {
         
 
         try {
-            //TODO: 
             const payload = await JwtAdapter.validateToken<{ id: string }>(token);
             if (!payload) return res.status(401).json({ error: 'Invalid token' });
             
+            // Feature flag para elegir la base de datos
+            const usePostgres = process.env.USE_POSTGRES === 'true';
+            
+            let user;
+            if (usePostgres) {
+                // Usar Prisma para PostgreSQL
+                const prisma = PostgresDatabase.client;
+                user = await prisma.user.findUnique({
+                    where: { id: payload.id }
+                });
+            } else {
+                // Usar Mongoose para MongoDB
+                user = await UserModel.findById(payload.id);
+            }
 
-            const user = await UserModel.findById(payload.id);
             if (!user) return res.status(401).json({ error: 'Invalid token - User not found' });
 
             if (!req.body) req.body = {};
@@ -35,7 +48,7 @@ export class AuthMiddleware {
             next();
         } catch (error) {
             console.log(error);
-            res.status(500).json({ error: 'Internal Server Error es aqui socio' });
+            res.status(500).json({ error: 'Internal Server Error' });
         }
 
     }

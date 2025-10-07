@@ -13,3 +13,33 @@ services:
       - ./mongo:/data/db
     ports:
       - 27017:27017
+
+  # PostgreSQL (nuevo)
+  postgres-db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_pass
+      POSTGRES_DB: mystore_pg
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d mystore_pg"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin (herramienta de administración)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - 5050:80
+    depends_on:
+      - postgres-db

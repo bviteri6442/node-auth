@@ -1,0 +1,44 @@
+# API Tests para Node-Auth con PostgreSQL
+
+### 1. Login con usuario existente (Bryan) - EJECUTAR PRIMERO
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bryan@example.com",
+  "password": "123456"
+}
+
+# COPIA EL TOKEN DE LA RESPUESTA Y REEMPLÁZALO ABAJO
+
+###
+
+### 2. Obtener todos los usuarios (requiere token JWT del login)
+# Reemplaza YOUR_JWT_TOKEN_HERE con el token del paso 1
+GET http://localhost:3000/api/auth/
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+###
+
+### 3. Registrar un nuevo usuario
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User PG",
+  "email": "testpg@example.com",
+  "password": "TestPassword123!"
+}
+
+###
+
+### 4. Login con el nuevo usuario
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testpg@example.com",
+  "password": "TestPassword123!"
+}
+
+###

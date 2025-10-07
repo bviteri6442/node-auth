@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { AuthController } from './controller';
-import { AuthDatasourceImpl, AuthRepositoryImpl } from '../../infrastructure';
+import {
+  AuthDatasourceImpl,
+  AuthRepositoryImpl,
+  PostgresAuthDatasourceImpl,
+} from '../../infrastructure';
 import { AuthMiddleware } from '../middlewares/auth.middleware';
 
 
@@ -11,7 +15,12 @@ export class AuthRoutes {
 
         const router = Router();
 
-        const database = new AuthDatasourceImpl();
+        // Feature flag para elegir datasource
+        const usePostgres = process.env.USE_POSTGRES === 'true';
+
+        const database = usePostgres
+          ? new PostgresAuthDatasourceImpl()
+          : new AuthDatasourceImpl();
         
         const authRepository = new AuthRepositoryImpl(database);
         
